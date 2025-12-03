@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PulseFit — Fitness Club</title>
+<style>
+  :root{
+    --accent:#ff5a5f;
+    --dark:#0f1724;
+    --muted:#6b7280;
+    --card:#ffffff;
+    --glass: rgba(255,255,255,0.06);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;color:var(--dark);background:linear-gradient(180deg,#f7fafc, #eef2f7);}
+  header{background:linear-gradient(90deg,var(--accent),#ff8a65);color:white;padding:40px 16px 56px;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center}
+  header h1{margin:0;font-size:clamp(28px,4vw,44px);letter-spacing:0.4px}
+  header p{margin:10px 0 0;color:rgba(255,255,255,0.95);max-width:900px}
+  .container{max-width:1100px;margin:-40px auto 60px;padding:0 16px;display:grid;grid-template-columns:1fr;gap:24px}
+  
+  .grid{display:grid;grid-template-columns:2fr 1fr;gap:20px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}.container{margin-top:10px}}
+  
+  .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 6px 20px rgba(16,24,40,0.06)}
+  h2{margin:0 0 12px;font-size:20px}
+  small.muted{color:var(--muted);display:block;margin-bottom:12px}
+  
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  .btn{background:var(--accent);color:white;padding:8px 12px;border-radius:8px;border:none;cursor:pointer;font-weight:600}
+  .btn.ghost{background:#fff;border:1px solid #eee;color:var(--dark)}
+  .schedule-list{display:grid;gap:10px}
+  .session{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:8px;background:linear-gradient(180deg,#fff,#fff);border:1px solid #f1f5f9}
+  .session .meta{color:var(--muted);font-size:14px}
+  
+  .trainers-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .trainer{display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px;border-radius:10px;cursor:pointer}
+  .trainer img{width:100%;height:140px;object-fit:cover;border-radius:8px;margin-bottom:10px}
+  .trainer h4{margin:0 0 6px;font-size:16px}
+  .trainer p{margin:0;color:var(--muted);font-size:13px}
+  
+  .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+  .plan{border-radius:10px;padding:14px;text-align:center;border:1px solid #edf2f7}
+  .plan.best{box-shadow:0 8px 30px rgba(255,90,95,0.08);border:2px solid rgba(255,90,95,0.12);transform:translateY(-4px)}
+  .price{font-size:22px;font-weight:700;margin:8px 0}
+  
+  .blog-list{display:grid;gap:12px}
+  .post{display:grid;grid-template-columns:100px 1fr;gap:12px;align-items:start}
+  .post img{width:100%;height:70px;object-fit:cover;border-radius:8px}
+  .post h5{margin:0 0 6px;font-size:15px}
+  .muted-inline{color:var(--muted);font-size:13px}
+  
+  .small-card{display:flex;align-items:center;gap:12px}
+  .small-card img{width:72px;height:64px;object-fit:cover;border-radius:8px}
+
+  footer{padding:24px 16px;text-align:center;color:var(--muted)}
+  
+  .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:flex;align-items:center;justify-content:center;padding:20px;z-index:80}
+  .modal{background:white;padding:18px;border-radius:12px;max-width:720px;width:100%;box-shadow:0 12px 40px rgba(2,6,23,0.3)}
+  .modal h3{margin-top:0}
+  .close{background:#efefef;border-radius:8px;padding:6px 10px;border:none;cursor:pointer}
+  
+  .flex{display:flex;gap:12px;align-items:center}
+  .stack{display:flex;flex-direction:column;gap:8px}
+  input[type="text"], input[type="email"], select{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ee}
+  .muted-note{font-size:13px;color:var(--muted)}
+  .cta{display:flex;gap:8px;align-items:center;justify-content:flex-end}
+  @media(max-width:520px){
+    .post{grid-template-columns:1fr;grid-auto-rows:auto}
+    .trainer img{height:120px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>PulseFit Club</h1>
+  <p>Strength • Cardio • Mindfulness — memberships, classes & trainers to help you become your best self.</p>
+</header>
+
+<main class="container">
+  <div class="grid">
+    
+    <div>
+      
+      <section class="card" aria-labelledby="scheduleTitle">
+        <h2 id="scheduleTitle">Class Schedule</h2>
+        <small class="muted">Filter by day or type and book your slot</small>
+
+        <div class="controls" role="toolbar" aria-label="Schedule controls">
+          <select id="daySelect" aria-label="Select day">
+            <option value="All">All Days</option>
+            <option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
+          </select>
+
+          <select id="typeSelect" aria-label="Select type">
+            <option value="All">All Types</option>
+            <option>Yoga</option><option>Strength</option><option>HIIT</option><option>Spin</option><option>Pilates</option>
+          </select>
+
+          <button class="btn" id="refreshBtn">Refresh</button>
+        </div>
+
+        <div class="schedule-list" id="scheduleList" aria-live="polite"></div>
+      </section>
+
+      
+      <section class="card" style="margin-top:18px" aria-labelledby="blogTitle">
+        <h2 id="blogTitle">Fitness Tips & Blog</h2>
+        <small class="muted">Short reads to level up your routine</small>
+
+        <div class="blog-list" id="blogList" style="margin-top:12px"></div>
+      </section>
+    </div>
+
+    
+    <aside>
+      " aria-labelledby="trainersTitle">
+        <h2 id="trainersTitle">Meet Our Trainers</h2>
+        <small class="muted">Click a trainer to view profile and book a session</small>
+        <div class="trainers-grid" id="trainersGrid" style="margin-top:12px"></div>
+      </section>
+
+      
+      <section class="card" style="margin-top:18px" aria-labelledby="plansTitle">
+        <h2 id="plansTitle">Membership Plans</h2>
+        <small class="muted">Choose a plan that fits your goals</small>
+
+        <div class="plans" id="plans" style="margin-top:12px">
+          
+        </div>
+
+        <div style="margin-top:12px">
+          <form id="checkoutForm" class="stack" aria-label="Membership checkout">
+            <input type="text" id="memberName" placeholder="Your name" required />
+            <input type="email" id="memberEmail" placeholder="Email" required />
+            <select id="selectedPlan">
+              <option value="">Select plan</option>
+            </select>
+            <div class="cta">
+              <button class="btn" type="submit">Proceed</button>
+            </div>
+            <div id="checkoutMsg" class="muted-note" aria-live="polite"></div>
+          </form>
+        </div>
+      </section>
+
+      
+      <section class="card" style="margin-top:18px">
+        <h2>Quick Trial</h2>
+        <small class="muted">Book a free trial session</small>
+        <div style="margin-top:12px" class="stack">
+          <input type="text" id="trialName" placeholder="Your name" />
+          <input type="email" id="trialEmail" placeholder="Email" />
+          <select id="trialClass">
+            <option>Yoga</option><option>Strength</option><option>HIIT</option><option>Spin</option>
+          </select>
+          <button class="btn" id="trialBtn">Book Free Trial</button>
+          <div id="trialMsg" class="muted-note" aria-live="polite"></div>
+        </div>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<footer>
+  <small class="muted">© 2025 PulseFit Club — Built with sweat and care.</small>
+</footer>
+
+
+<div id="modalRoot" style="display:none"></div>
+
+<script>
+
+const SESSIONS = [
+  {id:1, title:'Morning Yoga', type:'Yoga', day:'Monday', time:'07:00 AM', coachId:1, spots:8, desc:'Flow-based yoga for mobility and calm.'},
+  {id:2, title:'Power Strength', type:'Strength', day:'Monday', time:'06:00 PM', coachId:2, spots:6, desc:'Barbell and bodyweight strength training.'},
+  {id:3, title:'HIIT Blast', type:'HIIT', day:'Tuesday', time:'07:00 AM', coachId:3, spots:10, desc:'Fast-paced high-intensity intervals.'},
+  {id:4, title:'Evening Pilates', type:'Pilates', day:'Wednesday', time:'07:30 PM', coachId:4, spots:8, desc:'Core and posture focused pilates.'},
+  {id:5, title:'Spin Express', type:'Spin', day:'Friday', time:'06:30 AM', coachId:5, spots:12, desc:'High-energy cycling with music.'},
+  {id:6, title:'Strength Foundations', type:'Strength', day:'Saturday', time:'09:30 AM', coachId:2, spots:8, desc:'Technique-focused strength class.'},
+];
+
+const TRAINERS = [
+  {id:1, name:'Anjali Rao', title:'Yoga Coach', bio:'10+ years teaching vinyasa, mobility & meditation.', img:'https://picsum.photos/seed/tr1/400/300'},
+  {id:2, name:'Rohit Verma', title:'Strength Coach', bio:'Specializes in progressive overload & functional strength.', img:'https://picsum.photos/seed/tr2/400/300'},
+  {id:3, name:'Sara Diaz', title:'HIIT Specialist', bio:'Certified in metabolic conditioning and endurance.', img:'https://picsum.photos/seed/tr3/400/300'},
+  {id:4, name:'Kevin Lee', title:'Pilates Instructor', bio:'Focus on alignment, rehab, and posture.', img:'https://picsum.photos/seed/tr4/400/300'},
+  {id:5, name:'Maya Patel', title:'Spin Coach', bio:'High-energy classes and cycling technique.', img:'https://picsum.photos/seed/tr5/400/300'},
+];
+
+const PLANS = [
+  {id:'basic', name:'Basic', price:799, perks:['Access to gym equipment','2 group classes/week'], recommended:false},
+  {id:'pro', name:'Pro', price:1499, perks:['Unlimited group classes','1 PT session/month','Sauna access'], recommended:true},
+  {id:'elite', name:'Elite', price:2499, perks:['Unlimited classes','4 PT sessions/month','Nutrition consult','Locker & towel'], recommended:false},
+];
+
+const POSTS = [
+  {id:1, title:'5-Minute Warmups That Actually Work', excerpt:'Short warmups that improve mobility and reduce injury risk.', img:'https://picsum.photos/seed/post1/300/200', content:'Start with dynamic leg swings, arm circles, and hip openers. Aim for movement patterns used in your workout to prime muscles and the nervous system.'},
+  {id:2, title:'How to Progress Strength Safely', excerpt:'Small weekly overloads beat ego lifts every time.', img:'https://picsum.photos/seed/post2/300/200', content:'Track reps and weights. Progress in 2.5-5% increments. Focus on consistent technique over heavy singles.'},
+  {id:3, title:'Quick Post-Workout Recovery Tips', excerpt:'Nutrition and sleep strategies to recover faster.', img:'https://picsum.photos/seed/post3/300/200', content:'Refuel within 60 minutes with protein + carbs, hydrate, and aim for quality sleep to enable adaptation.'}
+];
+
+
+const scheduleListEl = document.getElementById('scheduleList');
+const daySelect = document.getElementById('daySelect');
+const typeSelect = document.getElementById('typeSelect');
+
+function renderSchedule(){
+  const day = daySelect.value;
+  const type = typeSelect.value;
+  const filtered = SESSIONS.filter(s => (day === 'All' || s.day === day) && (type === 'All' || s.type === type));
+  scheduleListEl.innerHTML = '';
+  if(filtered.length === 0){
+    scheduleListEl.innerHTML = '<div class="muted-note">No sessions match your filters.</div>';
+    return;
+  }
+  filtered.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'session';
+    div.innerHTML = `
+      <div>
+        <strong>${s.title}</strong>
+        <div class="meta">${s.day} • ${s.time} • <span>${s.type}</span></div>
+      </div>
+      <div style="text-align:right">
+        <div class="meta">Spots: <strong id="spots-${s.id}">${s.spots}</strong></div>
+        <div style="margin-top:8px">
+          <button class="btn ghost" onclick="openSession(${s.id})">Details</button>
+          <button class="btn" onclick="bookSession(${s.id})" ${s.spots<=0? 'disabled':''}>Book</button>
+        </div>
+      </div>
+    `;
+    scheduleListEl.appendChild(div);
+  });
+}
+
+
+const trainersGrid = document.getElementById('trainersGrid');
+function renderTrainers(){
+  trainersGrid.innerHTML = '';
+  TRAINERS.forEach(t=>{
+    const card = document.createElement('div');
+    card.className = 'trainer card';
+    card.onclick = ()=> openTrainer(t.id);
+    card.innerHTML = `
+      <img src="${t.img}" alt="${t.name}">
+      <h4>${t.name}</h4>
+      <p>${t.title}</p>
+    `;
+    trainersGrid.appendChild(card);
+  });
+}
+
+
+const plansEl = document.getElementById('plans');
+const selectedPlanSelect = document.getElementById('selectedPlan');
+function renderPlans(){
+  plansEl.innerHTML = '';
+  selectedPlanSelect.innerHTML = '<option value="">Select plan</option>';
+  PLANS.forEach(p=>{
+    const div = document.createElement('div');
+    div.className = 'plan card' + (p.recommended? ' best':'');
+    div.innerHTML = `
+      <h4>${p.name}${p.recommended? ' • Recommended':''}</h4>
+      <div class="price">₹${p.price}</div>
+      <div class="muted-note" style="min-height:46px">${p.perks.map(x=>'<div>• '+x+'</div>').join('')}</div>
+      <div style="margin-top:8px"><button class="btn" onclick="selectPlan('${p.id}')">Choose</button></div>
+    `;
+    plansEl.appendChild(div);
+
+    const opt = document.createElement('option');
+    opt.value = p.id; opt.textContent = `${p.name} — ₹${p.price}`;
+    selectedPlanSelect.appendChild(opt);
+  });
+}
+
+
+const blogList = document.getElementById('blogList');
+function renderBlog(){
+  blogList.innerHTML = '';
+  POSTS.forEach(post=>{
+    const el = document.createElement('div');
+    el.className = 'post card';
+    el.innerHTML = `
+      <img src="${post.img}" alt="${post.title}">
+      <div>
+        <h5>${post.title}</h5>
+        <div class="muted-inline">${post.excerpt}</div>
+        <div style="margin-top:8px"><button class="btn ghost" onclick="toggleRead(${post.id})" id="readBtn-${post.id}">Read more</button></div>
+        <div id="full-${post.id}" style="display:none;margin-top:8px;color:var(--muted)">${post.content}</div>
+      </div>
+    `;
+    blogList.appendChild(el);
+  });
+}
+
+
+daySelect.addEventListener('change', renderSchedule);
+typeSelect.addEventListener('change', renderSchedule);
+document.getElementById('refreshBtn').addEventListener('click', ()=>{
+  renderSchedule();
+  flashMessage('Schedule refreshed');
+});
+
+
+function bookSession(id){
+  const session = SESSIONS.find(s=>s.id===id);
+  if(!session) return;
+  if(session.spots <= 0){
+    alert('Sorry, no spots left.');
+    return;
+  }
+  const name = prompt(`Enter your name to book "${session.title}" (${session.day} ${session.time})`);
+  if(!name) return;
+  session.spots -= 1;
+  const spotsEl = document.getElementById(`spots-${id}`);
+  if(spotsEl) spotsEl.textContent = session.spots;
+  flashMessage(`Booked ${session.title} for ${name}. Confirmation sent to your email (simulated).`);
+}
+
+
+function openSession(id){
+  const s = SESSIONS.find(x=>x.id===id);
+  if(!s) return;
+  showModal(`
+    <h3>${s.title}</h3>
+    <p class="muted-note">${s.day} • ${s.time} • ${s.type}</p>
+    <p>${s.desc}</p>
+    <p class="muted-note">Coach: ${getCoachName(s.coachId)}</p>
+    <div style="margin-top:12px;text-align:right">
+      <button class="close" onclick="closeModal()">Close</button>
+      <button class="btn" onclick="bookSession(${s.id})">Book Now</button>
+    </div>
+  `);
+}
+
+
+function getCoachName(id){
+  const t = TRAINERS.find(x=>x.id===id);
+  return t ? t.name : 'Coach';
+}
+function openTrainer(id){
+  const t = TRAINERS.find(x=>x.id===id);
+  if(!t) return;
+  showModal(`
+    <div style="display:flex;gap:12px;align-items:flex-start;">
+      <img src="${t.img}" alt="${t.name}" style="width:180px;height:140px;object-fit:cover;border-radius:8px">
+      <div style="flex:1">
+        <h3>${t.name}</h3>
+        <p class="muted-note">${t.title}</p>
+        <p>${t.bio}</p>
+        <div style="margin-top:12px">
+          <button class="btn" onclick="bookTrainer(${t.id})">Book Training</button>
+          <button class="close" onclick="closeModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  `);
+}
+function bookTrainer(id){
+  const t = TRAINERS.find(x=>x.id===id);
+  closeModal();
+  const name = prompt(`Enter your name to request a private session with ${t.name}`);
+  if(!name) return;
+  flashMessage(`Request sent to ${t.name}. They will contact ${name} (simulated).`);
+}
+
+
+const modalRoot = document.getElementById('modalRoot');
+function showModal(html){
+  modalRoot.innerHTML = `
+    <div class="modal-backdrop" role="dialog" aria-modal="true">
+      <div class="modal">${html}</div>
+    </div>`;
+  modalRoot.style.display = 'block';
+}
+function closeModal(){ modalRoot.innerHTML=''; modalRoot.style.display='none'; }
+
+
+function selectPlan(id){
+  document.getElementById('selectedPlan').value = id;
+  flashMessage('Plan selected: ' + id);
+}
+document.getElementById('checkoutForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const name = document.getElementById('memberName').value.trim();
+  const email = document.getElementById('memberEmail').value.trim();
+  const planId = document.getElementById('selectedPlan').value;
+  const msgEl = document.getElementById('checkoutMsg');
+  msgEl.style.color = '#000';
+  if(!name || !email || !planId){
+    msgEl.textContent = 'Please fill name, email and choose a plan.';
+    msgEl.style.color = 'red';
+    return;
+  }
+  const plan = PLANS.find(p=>p.id===planId);
+  msgEl.textContent = `Thanks ${name}! Your ${plan.name} plan (₹${plan.price}) signup is confirmed (simulated). A receipt was sent to ${email}.`;
+  e.target.reset();
+});
+
+
+document.getElementById('trialBtn').addEventListener('click', ()=>{
+  const n = document.getElementById('trialName').value.trim();
+  const e = document.getElementById('trialEmail').value.trim();
+  const cls = document.getElementById('trialClass').value;
+  const msg = document.getElementById('trialMsg');
+  if(!n || !e){ msg.textContent = 'Enter name and email'; msg.style.color='red'; return; }
+  msg.style.color='green';
+  msg.textContent = `Free trial for ${cls} booked for ${n}. We'll email ${e} with details (simulated).`;
+  setTimeout(()=>{ msg.textContent=''; }, 8000);
+});
+
+
+function toggleRead(id){
+  const full = document.getElementById('full-'+id);
+  const btn = document.getElementById('readBtn-'+id);
+  if(!full) return;
+  if(full.style.display === 'block'){ full.style.display = 'none'; btn.textContent = 'Read more'; }
+  else { full.style.display = 'block'; btn.textContent = 'Show less'; }
+}
+
+
+function flashMessage(msg){
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.position='fixed'; el.style.right='18px'; el.style.bottom='18px'; el.style.background='#111'; el.style.color='white';
+  el.style.padding='10px 14px'; el.style.borderRadius='8px'; el.style.zIndex=999;
+  document.body.appendChild(el);
+  setTimeout(()=> el.remove(), 4200);
+}
+
+
+renderSchedule();
+renderTrainers();
+renderPlans();
+renderBlog();
+
+</script>
+</body>
+</html>
